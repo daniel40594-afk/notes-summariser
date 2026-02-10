@@ -2,10 +2,10 @@ const { Innertube, UniversalCache } = require('youtubei.js');
 const OpenAI = require('openai');
 require('dotenv').config({ path: '.env.local' });
 
-const VIDEO_URL = 'https://youtu.be/WaK-MZKqMCk?si=b3sWOHzaVOysAqpr';
+const VIDEO_URL = 'https://youtu.be/Ad3HP6iRyUE?si=Y61Ff-q8VzHkltnR';
 
 async function testStudyTool() {
-    console.log('--- Starting Test ---');
+    console.log('--- Starting Test (Streaming) ---');
     console.log('Video URL:', VIDEO_URL);
 
     // 1. Setup OpenRouter
@@ -59,13 +59,7 @@ async function testStudyTool() {
         console.log('Transcript fetch failed:', err.message);
         console.log('Falling back to metadata...');
         source = 'metadata';
-        // Logic to fetch description would go here, simplified for test
         transcriptText = "Title: Test Video. Description: This is a test video description since transcript failed.";
-    }
-
-    if (!transcriptText) {
-        console.error('Failed to get any text content.');
-        return;
     }
 
     // 4a. Strategy B: youtube-transcript (Fallback)
@@ -81,10 +75,15 @@ async function testStudyTool() {
         }
     }
 
-    // 5. Call AI
-    console.log(`Generating notes using ${source} via OpenRouter...`);
+    if (!transcriptText) {
+        console.error('Failed to get any text content.');
+        return;
+    }
 
-    const systemPrompt = `You are an expert AI tutor. Generate a summary and study notes. Output JSON: { "summary": "...", "studyNotes": "..." }`;
+    // 5. Call AI (Streaming Test)
+    console.log(`Generating notes using ${source} via OpenRouter (Streaming Mode)...`);
+
+    const systemPrompt = `You are an expert AI tutor. Generate a summary and study notes (Markdown).`;
 
     try {
         const completion = await openai.chat.completions.create({
@@ -93,13 +92,16 @@ async function testStudyTool() {
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: `Input: "${transcriptText.substring(0, 10000)}"` }
             ],
-            response_format: { type: 'json_object' }
+            stream: true,
         });
 
-        const content = completion.choices[0].message.content;
-        console.log('\n--- AI Response ---');
-        console.log(content);
-        console.log('\n--- Test Passed ---');
+        console.log('\n--- Stream Started ---');
+        for await (const chunk of completion) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            process.stdout.write(content);
+        }
+        console.log('\n\n--- Stream Finished ---');
+        console.log('Test Passed');
 
     } catch (err) {
         console.error('AI Generation failed:', err);

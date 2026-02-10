@@ -48,23 +48,18 @@ export async function POST(request: Request) {
         let videoTitle = '';
         let source = 'transcript'; // 'transcript' or 'metadata'
 
-        // 2. Try Fetching Transcript (Strategy A: youtubei.js)
+        // 2. Fetch Transcript (Strategy A: youtubei.js)
         try {
-            console.log('[Study API] Attempting youtubei.js fetch...');
             const yt = await getYoutubeClient();
             if (yt) {
                 const info = await yt.getInfo(videoId);
                 videoTitle = info.basic_info.title || '';
-                console.log(`[Study API] Video Title: ${videoTitle}`);
-
                 try {
                     const transcriptData = await info.getTranscript();
                     if (transcriptData?.transcript?.content?.body?.initial_segments) {
                         const initialSegments = transcriptData.transcript.content.body.initial_segments;
                         transcriptText = initialSegments.map((seg: any) => seg.snippet.text).join(' ');
                         console.log(`[Study API] youtubei.js success. Length: ${transcriptText.length}`);
-                    } else {
-                        console.log('[Study API] youtubei.js: No initial_segments found in transcript data.');
                     }
                 } catch (transcriptErr: any) {
                     console.log(`[Study API] youtubei.js transcript fetch error: ${transcriptErr.message}`);
@@ -74,10 +69,9 @@ export async function POST(request: Request) {
             console.log(`[Study API] youtubei.js info fetch failed: ${err.message}`);
         }
 
-        // 3. Strategy B: youtube-transcript (Fallback)
+        // 3. Fallback: youtube-transcript
         if (!transcriptText) {
             try {
-                console.log('[Study API] Attempting youtube-transcript fallback...');
                 const transcript = await YoutubeTranscript.fetchTranscript(videoId);
                 transcriptText = transcript.map(item => item.text).join(' ');
                 console.log(`[Study API] youtube-transcript success. Length: ${transcriptText.length}`);
@@ -86,7 +80,7 @@ export async function POST(request: Request) {
             }
         }
 
-        // 4. Strategy C: Metadata Fallback
+        // 4. Fallback: Metadata
         if (!transcriptText) {
             console.log('[Study API] Falling back to metadata...');
             source = 'metadata';
@@ -97,9 +91,10 @@ export async function POST(request: Request) {
                     videoTitle = info.basic_info.title || '';
                     const description = info.basic_info.short_description || '';
                     transcriptText = `VIDEO TITLE: ${videoTitle}\n\nDESCRIPTION: ${description}`;
-                    console.log(`[Study API] Metadata fallback success. Length: ${transcriptText.length}`);
                 } else {
-                    throw new Error('Innertube not initialized');
+                    // If Innertube failed earlier, we might not have it.
+                    // Final fallback: just return error
+                    throw new Error('Could not fetch metadata');
                 }
             } catch (metadataErr: any) {
                 console.error(`[Study API] Metadata fetch failed: ${metadataErr.message}`);
@@ -109,72 +104,61 @@ export async function POST(request: Request) {
             }
         }
 
-        // 5. Generate Summary & Notes with OpenRouter (Gemini)
+        // 5. Generate with Streaming
         if (!process.env.OPENROUTER_API_KEY) {
-            console.error('[Study API] Missing OPENROUTER_API_KEY');
             return NextResponse.json({ error: 'OpenRouter API Key is not configured' }, { status: 500 });
         }
 
-        const systemPrompt = source === 'transcript'
-            ? `You are an expert AI tutor. Your goal is to generate structured study notes from the provided video transcript.
-           Output Format (JSON):
-           {
-             "summary": "A comprehensive summary of the video (2-3 paragraphs)",
-             "studyNotes": "Markdown formatted study notes with headings, bullet points, and key concepts."
-           }
-           Ensure the study notes are detailed, easy to understand, and capturing the core essence of the video. Return ONLY the JSON.`
-            : `You are an expert AI tutor. The user wants study notes for a video, but we could not retreive the transcript. 
-           We only have the Title and Description.
-           
-           Goal: Generate a summary and potential study topics/questions based ONLY on the metadata provided.
-           Explicitly state in the summary that this is based on the video description because captions were unavailable.
-           
-           Output Format (JSON):
-           {
-             "summary": "Summary based on title and description. Mention that detailed notes are limited due to missing transcript.",
-             "studyNotes": "Markdown formatted key topics, questions to ask, or concepts likely covered in the video."
-           }
-           Return ONLY the JSON.`;
+        const systemPrompt = source === 'metadata'
+            ? `You are an expert AI tutor. The transcript is unavailable.
+       Generate study notes based ONLY on the video title and description.
+       
+       Output Format (Markdown Only):
+       # Summary
+       [Summary based on metadata. Mention captions were missing.]
+       
+       # Study Notes
+       [Key topics/questions likely covered]`
+            : `You are an expert AI tutor. Generate study notes from the transcript.
+       
+       Output Format (Markdown Only):
+       # Summary
+       [Comprehensive summary]
+       
+       # Study Notes
+       [Detailed bullet points, definitions, key concepts]`;
 
-        console.log(`[Study API] Calling OpenRouter (Gemini) with input length: ${transcriptText.length}`);
+        const response = await openai.chat.completions.create({
+            model: 'google/gemini-2.0-flash-001',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Input Data: "${transcriptText.substring(0, 30000)}"` }
+            ],
+            stream: true,
+        });
 
-        try {
-            const completion = await openai.chat.completions.create({
-                model: 'google/gemini-2.0-flash-001',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: `Input Data: "${transcriptText.substring(0, 30000)}"` }
-                ],
-                response_format: { type: 'json_object' }
-            });
+        // Create a readable stream from the OpenAI response
+        const stream = new ReadableStream({
+            async start(controller) {
+                for await (const chunk of response) {
+                    const content = chunk.choices[0]?.delta?.content || '';
+                    if (content) {
+                        controller.enqueue(new TextEncoder().encode(content));
+                    }
+                }
+                controller.close();
+            },
+        });
 
-            const content = completion.choices[0].message.content;
-
-            if (!content) {
-                throw new Error('No content received from AI');
+        // Return stream with custom headers
+        return new Response(stream, {
+            headers: {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+                'X-Study-Source': source,
             }
-
-            try {
-                const data = JSON.parse(content);
-                return NextResponse.json({
-                    ...data,
-                    source: source
-                });
-            } catch (e) {
-                console.error('[Study API] JSON parsing error', e);
-                return NextResponse.json({
-                    summary: "Error parsing AI response.",
-                    studyNotes: content,
-                    source: source
-                });
-            }
-        } catch (aiError: any) {
-            console.error(`[Study API] OpenRouter/AI Error: ${aiError.message}`);
-            // Check for specific OpenAI errors
-            if (aiError.status === 401) return NextResponse.json({ error: 'Invalid AI API Key' }, { status: 500 });
-            if (aiError.status === 429) return NextResponse.json({ error: 'AI Rate Limit Exceeded' }, { status: 429 });
-            return NextResponse.json({ error: `AI Generation Failed: ${aiError.message}` }, { status: 500 });
-        }
+        });
 
     } catch (error: any) {
         console.error('[Study API] Internal Server Error:', error);
