@@ -4,14 +4,14 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Loader2, BookOpen, AlertCircle, Sparkles } from 'lucide-react';
+import { Loader2, BookOpen, AlertCircle, Sparkles, Download, Info } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 export default function StudyToolPage() {
     const [url, setUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [result, setResult] = useState<{ summary: string; studyNotes: string } | null>(null);
+    const [result, setResult] = useState<{ summary: string; studyNotes: string; source?: string } | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,6 +42,19 @@ export default function StudyToolPage() {
         }
     };
 
+    const handleDownload = () => {
+        if (!result) return;
+
+        const content = `VIDEO SUMMARY\n\n${result.summary}\n\n-------------------\n\nSTUDY NOTES\n\n${result.studyNotes}`;
+        const blob = new Blob([content], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'study-notes.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="max-w-4xl mx-auto space-y-8">
             <div className="text-center space-y-4">
@@ -49,7 +62,7 @@ export default function StudyToolPage() {
                     AI Study Tool
                 </h1>
                 <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-                    Paste a YouTube video link below, and our AI will generate a comprehensive summary and structured study notes for you.
+                    Paste a YouTube video link below for an AI-generated summary and study notes.
                 </p>
             </div>
 
@@ -94,7 +107,24 @@ export default function StudyToolPage() {
             </Card>
 
             {result && (
-                <div className="grid gap-8 md:grid-cols-1">
+                <div className="space-y-6">
+                    <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={handleDownload} className="gap-2">
+                            <Download className="h-4 w-4" />
+                            Download Notes (.txt)
+                        </Button>
+                    </div>
+
+                    {result.source === 'metadata' && (
+                        <div className="p-4 bg-yellow-50 text-yellow-800 rounded-md flex items-start gap-2 border border-yellow-200">
+                            <Info className="h-5 w-5 mt-0.5 shrink-0" />
+                            <div>
+                                <p className="font-semibold">Transcript Unavailable</p>
+                                <p className="text-sm">We couldn't access the captions for this video. These notes were generated based on the video title and description, so they might be less detailed.</p>
+                            </div>
+                        </div>
+                    )}
+
                     <Card className="border-indigo-200">
                         <CardHeader className="bg-indigo-50 border-b border-indigo-100">
                             <CardTitle className="text-indigo-900 flex items-center gap-2">

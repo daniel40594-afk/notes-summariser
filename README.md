@@ -1,4 +1,4 @@
-# React Dashboard with RBAC & Approval Flow
+# Notes Summariser & RBAC Dashboard
 
 A production-ready dashboard application built with Next.js, Neon DB (PostgreSQL), and Tailwind CSS.
 
