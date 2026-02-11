@@ -104,7 +104,15 @@ export async function POST(request: Request) {
             }
         }
 
-        // 5. Generate with Streaming
+        // 5. Check if we have any content
+        if (!transcriptText || transcriptText.trim().length < 50) {
+            console.error('[Study API] Failed to extract any content (transcript or metadata).');
+            return NextResponse.json({
+                error: 'Could not extract content. The video might be blocked, private, or missing captions.'
+            }, { status: 422 });
+        }
+
+        // 6. Generate with Streaming
         if (!process.env.OPENROUTER_API_KEY) {
             return NextResponse.json({ error: 'OpenRouter API Key is not configured' }, { status: 500 });
         }
