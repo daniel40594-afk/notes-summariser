@@ -42,12 +42,7 @@ export default function Hero() {
                             </Button>
                         </Link>
 
-                        <Link href="/demo">
-                            <Button variant="outline" className="h-14 px-8 text-lg text-white border-white/20 hover:bg-white/10 rounded-full backdrop-blur-sm transition-all flex items-center gap-2">
-                                <PlayCircle className="w-5 h-5" />
-                                Watch Demo
-                            </Button>
-                        </Link>
+
                     </div>
                 </div>
 
