@@ -118,15 +118,21 @@ export async function POST(request: Request) {
         }
 
         const systemPrompt = source === 'metadata'
-            ? `You are an expert AI tutor. The transcript is unavailable.
-       Generate study notes based ONLY on the video title and description.
+            ? `You are an expert AI tutor. 
+       The user wants study notes for a video, but the transcript is unavailable.
+       You must generate the best possible notes based ONLY on the video title and description provided below.
+       
+       DO NOT complain about missing captions.
+       DO NOT say "I cannot generate notes".
+       
+       Goal: Infer the likely content of the video from the title and description and create a structured potential study guide.
        
        Output Format (Markdown Only):
        # Summary
-       [Summary based on metadata. Mention captions were missing.]
+       [A summary of what the video is likely about based on the description.]
        
-       # Study Notes
-       [Key topics/questions likely covered]`
+       # Key Topics & Questions
+       [A list of probable key topics, concepts, and study questions that would be relevant to this video's title.]`
             : `You are an expert AI tutor. Generate study notes from the transcript.
        
        Output Format (Markdown Only):
