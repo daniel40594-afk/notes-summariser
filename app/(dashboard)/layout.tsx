@@ -11,35 +11,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const pathname = usePathname();
 
     const handleLogout = async () => {
-        // In a real app we'd call an API to clear cookie
-        // For now we can just clear cookie client side if not httpOnly, 
-        // but since it is httpOnly, we need an API route /api/auth/logout
-        // Let's implement logout via simple redirect to login which might overwrite cookie or separate API
-        // Quick fix: Set cookie to expire
         document.cookie = 'token=; Max-Age=0; path=/;';
         router.push('/login');
     };
 
     return (
-        <div className="min-h-screen bg-gray-50/50">
-            <nav className="border-b bg-white px-4 py-3 sm:px-6">
+        <div className="min-h-screen bg-[#0a0a0a] text-white">
+            <nav className="border-b border-zinc-800 bg-[#0a0a0a] px-4 py-3 sm:px-6">
                 <div className="flex items-center justify-between mx-auto max-w-7xl">
                     <div className="flex items-center gap-6">
-                        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-indigo-600">
-                            <LayoutDashboard className="h-6 w-6" />
-                            <span>RBAC Dash</span>
+                        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white hover:text-orange-500 transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center glow-effect">
+                                <span className="text-white font-bold text-lg">C</span>
+                            </div>
+                            <span>Celestial</span>
                         </Link>
                         <nav className="hidden md:flex items-center gap-4">
-                            <Link href="/user" className="text-sm font-medium text-gray-500 hover:text-gray-900">Dashboard</Link>
-                            <Link href="/study" className="text-sm font-medium text-gray-500 hover:text-gray-900">AI Study Tool</Link>
+                            <Link href="/user" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Dashboard</Link>
+                            <Link href="/study" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">AI Study Tool</Link>
                         </nav>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 mr-4">
+                        <div className="hidden sm:flex items-center gap-2 text-sm text-zinc-400 mr-4">
                             <User className="h-4 w-4" />
                             <span>Account</span>
                         </div>
-                        <Button variant="outline" size="sm" onClick={handleLogout} className="text-gray-600 hover:text-red-600 hover:bg-red-50 hover:border-red-200">
+                        <Button variant="outline" size="sm" onClick={handleLogout} className="text-zinc-300 border-zinc-700 hover:bg-zinc-800 hover:text-white">
                             <LogOut className="h-4 w-4 mr-2" />
                             Sign Out
                         </Button>
