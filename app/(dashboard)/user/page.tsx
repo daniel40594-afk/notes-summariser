@@ -1,43 +1,130 @@
+'use client';
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { CheckCircle } from 'lucide-react';
+import { Activity, Users, CreditCard, DollarSign, TrendingUp, Filter } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 export default function UserDashboard() {
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">User Dashboard</h1>
+        <div className="space-y-8 animate-fade-in-up">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
+                    <p className="text-gray-400 mt-1">Overview of your activity and performance.</p>
+                </div>
+                <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/10 text-gray-300 hover:text-white hover:bg-white/5">
+                        <Filter className="w-4 h-4 mr-2" /> Filter
+                    </Button>
+                    <Button className="bg-gradient-orange hover:opacity-90">
+                        Download Report
+                    </Button>
+                </div>
+            </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Account Status</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+            {/* Metric Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                    { title: 'Total Revenue', value: '$45,231.89', change: '+20.1% from last month', icon: DollarSign },
+                    { title: 'Subscriptions', value: '+2350', change: '+180.1% from last month', icon: Users },
+                    { title: 'Sales', value: '+12,234', change: '+19% from last month', icon: CreditCard },
+                    { title: 'Active Now', value: '+573', change: '+201 since last hour', icon: Activity },
+                ].map((metric, i) => (
+                    <Card key={i} className="hover:border-orange-500/30 transition-colors group">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-gray-400 group-hover:text-white transition-colors">
+                                {metric.title}
+                            </CardTitle>
+                            <metric.icon className="h-4 w-4 text-orange-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-white">{metric.value}</div>
+                            <p className="text-xs text-gray-500 mt-1">{metric.change}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            {/* Middle Section: Graphs & Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
+
+                {/* Main Graph */}
+                <Card className="col-span-4 lg:col-span-5 relative overflow-hidden">
+                    <CardHeader>
+                        <CardTitle className="text-white">Revenue Overview</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-600">Active</div>
-                        <p className="text-xs text-gray-500">You have full access</p>
+                    <CardContent className="pl-2">
+                        <div className="h-[300px] w-full flex items-end justify-between gap-2 px-4 pb-4">
+                            {/* Fake Graph Bars */}
+                            {[40, 60, 45, 70, 50, 80, 65, 85, 90, 75, 60, 95].map((h, i) => (
+                                <div key={i} className="w-full bg-white/5 rounded-t-sm hover:bg-orange-500/20 transition-all relative group h-full flex flex-col justify-end">
+                                    <div
+                                        style={{ height: `${h}%` }}
+                                        className="w-full bg-gradient-to-t from-orange-500/10 to-orange-500 rounded-t-sm group-hover:from-orange-500/30 group-hover:to-orange-400 transition-all"
+                                    ></div>
+                                </div>
+                            ))}
+                        </div>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Role</CardTitle>
+                {/* Recent Activity */}
+                <Card className="col-span-3 lg:col-span-2">
+                    <CardHeader>
+                        <CardTitle className="text-white">Recent Sales</CardTitle>
+                        <p className="text-sm text-gray-400">You made 265 sales this month.</p>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-indigo-600">User</div>
-                        <p className="text-xs text-gray-500">Standard privileges</p>
+                        <div className="space-y-6">
+                            {[
+                                { name: 'Olivia Martin', email: 'olivia.martin@email.com', amount: '+$1,999.00', initial: 'OM' },
+                                { name: 'Jackson Lee', email: 'jackson.lee@email.com', amount: '+$39.00', initial: 'JL' },
+                                { name: 'Isabella Nguyen', email: 'isabella.nguyen@email.com', amount: '+$299.00', initial: 'IN' },
+                                { name: 'William Kim', email: 'will@email.com', amount: '+$99.00', initial: 'WK' },
+                                { name: 'Sofia Davis', email: 'sofia.davis@email.com', amount: '+$39.00', initial: 'SD' },
+                            ].map((user, i) => (
+                                <div key={i} className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium text-orange-500">
+                                            {user.initial}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-white leading-none">{user.name}</p>
+                                            <p className="text-xs text-gray-500 mt-1">{user.email}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-sm font-medium text-white">{user.amount}</div>
+                                </div>
+                            ))}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
 
-            <Card className="mt-6">
+            {/* Bottom Section: Analytics Line Graph */}
+            <Card>
                 <CardHeader>
-                    <CardTitle>Welcome Back!</CardTitle>
+                    <CardTitle className="text-white flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-orange-500" />
+                        Growth Analytics
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-gray-500">
-                        This is the protected user dashboard. Since you are seeing this, your account has been approved by an administrator.
-                    </p>
+                    <div className="h-[200px] w-full bg-white/5 rounded-lg flex items-center justify-center text-gray-500 relative overflow-hidden">
+                        {/* Simulated Line Graph Curve */}
+                        <svg viewBox="0 0 1000 200" className="w-full h-full absolute bottom-0 left-0" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="0%" stopColor="#ff6a00" stopOpacity="0.4" />
+                                    <stop offset="100%" stopColor="#ff6a00" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M0,150 C150,150 200,100 350,100 C500,100 550,50 700,50 C850,50 900,120 1000,80 V200 H0 Z" fill="url(#gradient)" />
+                            <path d="M0,150 C150,150 200,100 350,100 C500,100 550,50 700,50 C850,50 900,120 1000,80" stroke="#ff6a00" strokeWidth="3" fill="none" />
+                        </svg>
+                        <span className="relative z-10 text-sm opacity-0">Interactive Graph Component Placeholder</span>
+                    </div>
                 </CardContent>
             </Card>
         </div>
