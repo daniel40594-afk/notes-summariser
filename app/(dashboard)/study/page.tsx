@@ -7,14 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Loader2, BookOpen, AlertCircle, Sparkles, Download, Info } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-'use client';
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Loader2, BookOpen, AlertCircle, Sparkles, Download, Info } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 
 export default function StudyToolPage() {
     const [url, setUrl] = useState('');
