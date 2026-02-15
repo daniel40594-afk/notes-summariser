@@ -10,7 +10,8 @@ import {
     Settings,
     LogOut,
     ChevronLeft,
-    Menu
+    Menu,
+    Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -26,6 +27,7 @@ export default function Sidebar() {
     const navItems = [
         { name: 'Dashboard', href: '/user', icon: LayoutDashboard },
         { name: 'AI Study Tool', href: '/study', icon: BookOpen },
+        { name: 'User Management', href: '/admin', icon: Users },
         { name: 'Settings', href: '/user/settings', icon: Settings }, // Placeholder
     ];
 
