@@ -57,14 +57,15 @@ export default function LoginPage() {
     };
 
     return (
-        <Card className="w-full shadow-lg border-indigo-100">
-            <CardHeader className="space-y-1 text-center">
-                <CardTitle className="text-2xl font-bold tracking-tight text-indigo-900">Sign in to your account</CardTitle>
-                <p className="text-sm text-gray-500">
-                    Enter your email and password to access the dashboard
-                </p>
-            </CardHeader>
-            <CardContent>
+        <div className="liquid-glass rounded-2xl shadow-2xl overflow-hidden border border-white/10">
+            <div className="p-8 space-y-6">
+                <div className="text-center space-y-1">
+                    <h1 className="text-2xl font-bold tracking-tight text-white">Welcome Back</h1>
+                    <p className="text-sm text-gray-400">
+                        Sign in to your Celestial account
+                    </p>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <Input
@@ -76,6 +77,7 @@ export default function LoginPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             disabled={loading}
+                            className="bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-orange-500/50"
                         />
                     </div>
                     <div className="space-y-2">
@@ -88,15 +90,20 @@ export default function LoginPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             disabled={loading}
+                            className="bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-orange-500/50"
                         />
                     </div>
                     {error && (
-                        <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-md text-sm">
+                        <div className="flex items-center space-x-2 text-red-400 bg-red-500/10 p-3 rounded-md text-sm border border-red-500/20">
                             <AlertCircle size={16} />
                             <span>{error}</span>
                         </div>
                     )}
-                    <Button type="submit" className="w-full" disabled={loading}>
+                    <Button
+                        type="submit"
+                        className="w-full h-11 bg-gradient-orange hover:opacity-90 text-white font-medium shadow-lg shadow-orange-500/20"
+                        disabled={loading}
+                    >
                         {loading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -107,15 +114,16 @@ export default function LoginPage() {
                         )}
                     </Button>
                 </form>
-            </CardContent>
-            <CardFooter className="flex justify-center border-t p-4 bg-gray-50 rounded-b-lg">
-                <p className="text-sm text-gray-600">
+            </div>
+
+            <div className="px-8 py-4 bg-white/5 border-t border-white/5 text-center">
+                <p className="text-sm text-gray-400">
                     Don't have an account?{' '}
-                    <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">
+                    <Link href="/signup" className="font-medium text-orange-500 hover:text-orange-400 hover:underline transition-colors">
                         Sign up
                     </Link>
                 </p>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     );
 }

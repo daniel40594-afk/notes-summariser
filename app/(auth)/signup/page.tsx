@@ -47,37 +47,39 @@ export default function SignupPage() {
 
     if (success) {
         return (
-            <Card className="w-full shadow-lg border-green-100">
-                <CardHeader className="text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-4">
-                        <CheckCircle2 className="h-6 w-6 text-green-600" />
-                    </div>
-                    <CardTitle className="text-2xl font-bold text-gray-900">Registration Successful</CardTitle>
-                    <p className="mt-2 text-sm text-gray-600">
-                        Current status: <span className="font-semibold text-amber-600">Pending Approval</span>
+            <div className="liquid-glass rounded-2xl shadow-2xl p-8 border border-white/10 text-center animate-fade-in-up">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20 mb-6 glow-green">
+                    <CheckCircle2 className="h-8 w-8 text-green-500" />
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-2">Registration Successful</h2>
+                <p className="text-sm text-gray-400 mb-6">
+                    Current status: <span className="font-semibold text-orange-400">Pending Approval</span>
+                </p>
+                <div className="space-y-6">
+                    <p className="text-gray-300">
+                        Your account has been created. You will be able to access the dashboard once an administrator approves your account.
                     </p>
-                </CardHeader>
-                <CardContent className="text-center space-y-4">
-                    <p className="text-gray-500">
-                        Values account has been created successfully. You will be able to access the dashboard once an administrator approves your account.
-                    </p>
-                    <Button onClick={() => router.push('/login')} className="w-full">
+                    <Button
+                        onClick={() => router.push('/login')}
+                        className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/10"
+                    >
                         Go to Login
                     </Button>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         );
     }
 
     return (
-        <Card className="w-full shadow-lg border-indigo-100">
-            <CardHeader className="space-y-1 text-center">
-                <CardTitle className="text-2xl font-bold tracking-tight text-indigo-900">Create an account</CardTitle>
-                <p className="text-sm text-gray-500">
-                    Enter your email below to create your account
-                </p>
-            </CardHeader>
-            <CardContent>
+        <div className="liquid-glass rounded-2xl shadow-2xl overflow-hidden border border-white/10">
+            <div className="p-8 space-y-6">
+                <div className="text-center space-y-1">
+                    <h1 className="text-2xl font-bold tracking-tight text-white">Create an account</h1>
+                    <p className="text-sm text-gray-400">
+                        Enter your email below to get started
+                    </p>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <Input
@@ -89,6 +91,7 @@ export default function SignupPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             disabled={loading}
+                            className="bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-orange-500/50"
                         />
                     </div>
                     <div className="space-y-2">
@@ -101,15 +104,20 @@ export default function SignupPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             disabled={loading}
+                            className="bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-orange-500/50"
                         />
                     </div>
                     {error && (
-                        <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-md text-sm">
+                        <div className="flex items-center space-x-2 text-red-400 bg-red-500/10 p-3 rounded-md text-sm border border-red-500/20">
                             <AlertCircle size={16} />
                             <span>{error}</span>
                         </div>
                     )}
-                    <Button type="submit" className="w-full" disabled={loading}>
+                    <Button
+                        type="submit"
+                        className="w-full h-11 bg-gradient-orange hover:opacity-90 text-white font-medium shadow-lg shadow-orange-500/20"
+                        disabled={loading}
+                    >
                         {loading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -120,15 +128,16 @@ export default function SignupPage() {
                         )}
                     </Button>
                 </form>
-            </CardContent>
-            <CardFooter className="flex justify-center border-t p-4 bg-gray-50 rounded-b-lg">
-                <p className="text-sm text-gray-600">
+            </div>
+
+            <div className="px-8 py-4 bg-white/5 border-t border-white/5 text-center">
+                <p className="text-sm text-gray-400">
                     Already have an account?{' '}
-                    <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">
+                    <Link href="/login" className="font-medium text-orange-500 hover:text-orange-400 hover:underline transition-colors">
                         Sign in
                     </Link>
                 </p>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     );
 }
