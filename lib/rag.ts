@@ -1,8 +1,9 @@
 import { pipeline } from '@xenova/transformers';
 // @ts-ignore
-import * as pdfParse from 'pdf-parse';
-// @ts-ignore
-const pdf = pdfParse.default || pdfParse;
+const pdfModule = require('pdf-parse');
+// Prefer named export 'PDFParse' if it exists, otherwise default/module
+const pdf = pdfModule.PDFParse || (typeof pdfModule === 'function' ? pdfModule : pdfModule.default);
+
 import mammoth from 'mammoth';
 import Tesseract from 'tesseract.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,8 +55,22 @@ export const extractText = async (fileBuffer: Buffer, fileType: string, filename
 
     if (fileType === 'application/pdf') {
         try {
-            const data = await pdf(fileBuffer);
-            if (data.text && data.text.trim().length > 50) {
+            let data;
+            try {
+                // 1. Try as function
+                data = await pdf(fileBuffer);
+            } catch (e: any) {
+                if (e.message?.includes("Class constructors")) {
+                    console.log('[RAG] PDF Parse requires new, instantiating...');
+                    // 2. Try as class
+                    // @ts-ignore
+                    data = await new pdf(fileBuffer);
+                } else {
+                    throw e;
+                }
+            }
+
+            if (data && data.text && data.text.trim().length > 50) {
                 return data.text;
             } else {
                 console.log('[RAG] PDF has little text. Attempting OCR...');
