@@ -74,60 +74,56 @@ export default function UserDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
 
                 {/* Main Graph */}
-                <Card className="col-span-4 lg:col-span-5 relative overflow-hidden">
+                <Card className="col-span-4 lg:col-span-5 relative overflow-hidden border-white/10 shadow-lg">
                     <CardHeader>
-                        <CardTitle className="text-white">Revenue Overview</CardTitle>
+                        <CardTitle className="text-white">User Growth Overview</CardTitle>
                     </CardHeader>
                     <CardContent className="pl-2">
-                        <div className="h-[300px] w-full flex items-end justify-between gap-2 px-4 pb-4">
-                            {/* Fake Graph Bars */}
-                            {[40, 60, 45, 70, 50, 80, 65, 85, 90, 75, 60, 95].map((h, i) => (
-                                <div key={i} className="w-full bg-white/5 rounded-t-sm hover:bg-orange-500/20 transition-all relative group h-full flex flex-col justify-end">
-                                    <div
-                                        style={{ height: `${h}%` }}
-                                        className="w-full bg-gradient-to-t from-orange-500/10 to-orange-500 rounded-t-sm group-hover:from-orange-500/30 group-hover:to-orange-400 transition-all"
-                                    ></div>
-                                </div>
-                            ))}
+                        <div className="h-[300px] w-full flex items-center justify-center bg-white/5 rounded-lg border border-white/5">
+                            <p className="text-gray-500 text-sm">No historical data available yet</p>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Recent Activity */}
-                <Card className="col-span-3 lg:col-span-2">
+                <Card className="col-span-3 lg:col-span-2 border-white/10 shadow-lg">
                     <CardHeader>
-                        <CardTitle className="text-white">Recent Sales</CardTitle>
-                        <p className="text-sm text-gray-400">You made 265 sales this month.</p>
+                        <CardTitle className="text-white">Recent Signups</CardTitle>
+                        <p className="text-sm text-gray-400">Latest users joined.</p>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-6">
-                            {[
-                                { name: 'Olivia Martin', email: 'olivia.martin@email.com', amount: '+$1,999.00', initial: 'OM' },
-                                { name: 'Jackson Lee', email: 'jackson.lee@email.com', amount: '+$39.00', initial: 'JL' },
-                                { name: 'Isabella Nguyen', email: 'isabella.nguyen@email.com', amount: '+$299.00', initial: 'IN' },
-                                { name: 'William Kim', email: 'will@email.com', amount: '+$99.00', initial: 'WK' },
-                                { name: 'Sofia Davis', email: 'sofia.davis@email.com', amount: '+$39.00', initial: 'SD' },
-                            ].map((user, i) => (
-                                <div key={i} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium text-orange-500">
-                                            {user.initial}
+                            {loading ? (
+                                <p className="text-gray-500 text-sm">Loading...</p>
+                            ) : stats.recentSignups.length === 0 ? (
+                                <p className="text-gray-500 text-sm">No recent signups.</p>
+                            ) : (
+                                stats.recentSignups.map((user, i) => (
+                                    <div key={i} className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 rounded-full bg-orange-500/10 flex items-center justify-center text-sm font-medium text-orange-500 border border-orange-500/20">
+                                                {user.email.substring(0, 2).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-white leading-none truncate max-w-[150px]" title={user.email}>{user.email}</p>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    {new Date(user.created_at).toLocaleDateString()}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-white leading-none">{user.name}</p>
-                                            <p className="text-xs text-gray-500 mt-1">{user.email}</p>
+                                        <div className="text-xs font-medium text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full border border-orange-400/20">
+                                            {user.status}
                                         </div>
                                     </div>
-                                    <div className="text-sm font-medium text-white">{user.amount}</div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Bottom Section: Analytics Line Graph */}
-            <Card>
+            <Card className="border-white/10 shadow-lg">
                 <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-orange-500" />
@@ -135,19 +131,8 @@ export default function UserDashboard() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="h-[200px] w-full bg-white/5 rounded-lg flex items-center justify-center text-gray-500 relative overflow-hidden">
-                        {/* Simulated Line Graph Curve */}
-                        <svg viewBox="0 0 1000 200" className="w-full h-full absolute bottom-0 left-0" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="#ff6a00" stopOpacity="0.4" />
-                                    <stop offset="100%" stopColor="#ff6a00" stopOpacity="0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M0,150 C150,150 200,100 350,100 C500,100 550,50 700,50 C850,50 900,120 1000,80 V200 H0 Z" fill="url(#gradient)" />
-                            <path d="M0,150 C150,150 200,100 350,100 C500,100 550,50 700,50 C850,50 900,120 1000,80" stroke="#ff6a00" strokeWidth="3" fill="none" />
-                        </svg>
-                        <span className="relative z-10 text-sm opacity-0">Interactive Graph Component Placeholder</span>
+                    <div className="h-[200px] w-full bg-white/5 rounded-lg flex items-center justify-center text-gray-500 relative overflow-hidden border border-white/5">
+                        <p className="text-sm">Data collection in progress...</p>
                     </div>
                 </CardContent>
             </Card>
