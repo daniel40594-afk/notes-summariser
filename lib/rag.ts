@@ -1,11 +1,4 @@
 import { pipeline } from '@xenova/transformers';
-// @ts-ignore
-const pdfModule = require('pdf-parse');
-// Prefer named export 'PDFParse' if it exists, otherwise default/module
-const pdf = pdfModule.PDFParse || (typeof pdfModule === 'function' ? pdfModule : pdfModule.default);
-
-import mammoth from 'mammoth';
-import Tesseract from 'tesseract.js';
 import { v4 as uuidv4 } from 'uuid';
 import computeCosineSimilarity from 'compute-cosine-similarity';
 import pool from '@/lib/db';
@@ -54,6 +47,11 @@ export const extractText = async (fileBuffer: Buffer, fileType: string, filename
     console.log(`[RAG] Extracting text from ${filename} (${fileType})`);
 
     if (fileType === 'application/pdf') {
+        // Lazy load pdf-parse
+        // @ts-ignore
+        const pdfModule = require('pdf-parse');
+        const pdf = pdfModule.PDFParse || (typeof pdfModule === 'function' ? pdfModule : pdfModule.default);
+
         try {
             let data;
             try {
@@ -82,6 +80,8 @@ export const extractText = async (fileBuffer: Buffer, fileType: string, filename
         }
     }
     else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') { // docx
+        // Lazy load mammoth
+        const mammoth = require('mammoth');
         const result = await mammoth.extractRawText({ buffer: fileBuffer });
         return result.value;
     }
@@ -89,7 +89,8 @@ export const extractText = async (fileBuffer: Buffer, fileType: string, filename
         return fileBuffer.toString('utf-8');
     }
     else if (fileType.startsWith('image/')) {
-        // OCR
+        // Lazy load tesseract
+        const Tesseract = require('tesseract.js');
         console.log('[RAG] Running OCR on image...');
         const { data: { text } } = await Tesseract.recognize(fileBuffer, 'eng');
         return text;
