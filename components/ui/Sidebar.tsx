@@ -34,18 +34,18 @@ export default function Sidebar() {
     return (
         <aside
             className={cn(
-                "fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out border-r border-white/5 bg-[#0a0a0a]",
+                "fixed left-0 top-0 z-50 h-screen transition-all duration-300 ease-in-out border-r border-white/5 bg-[#0a0a0a]",
                 collapsed ? "w-20" : "w-64"
             )}
         >
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full relative">
                 {/* Header / Toggle */}
                 <div className="flex items-center justify-between p-4 h-16 border-b border-white/5">
-                    <div className={cn("flex items-center gap-3 overflow-hidden", collapsed && "justify-center w-full")}>
+                    <div className={cn("flex items-center gap-3 overflow-hidden transition-all duration-300", collapsed ? "justify-center w-full" : "justify-start")}>
                         <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center glow-orange">
                             <span className="text-white font-bold text-lg">C</span>
                         </div>
-                        <span className={cn("font-bold text-xl text-white tracking-tight whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0" : "opacity-100")}>
+                        <span className={cn("font-bold text-xl text-white tracking-tight whitespace-nowrap transition-all duration-300 origin-left", collapsed ? "opacity-0 w-0 scale-0" : "opacity-100 w-auto scale-100")}>
                             Celestial
                         </span>
                     </div>
@@ -53,11 +53,10 @@ export default function Sidebar() {
                     <button
                         onClick={() => setCollapsed(!collapsed)}
                         className={cn(
-                            "p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors hidden md:block",
-                            collapsed && "hidden"
+                            "absolute right-[-12px] top-6 p-1 rounded-full bg-zinc-800 text-gray-400 hover:text-white border border-white/10 transition-colors hidden md:flex items-center justify-center z-50",
                         )}
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className={cn("w-4 h-4 transition-transform duration-300", collapsed && "rotate-180")} />
                     </button>
                 </div>
 

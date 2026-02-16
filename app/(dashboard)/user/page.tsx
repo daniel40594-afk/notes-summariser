@@ -1,17 +1,41 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Activity, Users, CreditCard, DollarSign, TrendingUp, Filter } from 'lucide-react';
+import { Activity, Users, CreditCard, DollarSign, TrendingUp, Filter, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export default function UserDashboard() {
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        activeUsers: 0,
+        recentSignups: [] as any[]
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/dashboard/stats');
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch stats', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStats();
+    }, []);
+
     return (
-        <div className="space-y-8 animate-fade-in-up">
+        <div className="space-y-8 animate-fade-in-up pb-10">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
-                    <p className="text-gray-400 mt-1">Overview of your activity and performance.</p>
+                    <p className="text-gray-400 mt-1">Overview of system activity.</p>
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline" className="border-white/10 text-gray-300 hover:text-white hover:bg-white/5">
@@ -26,12 +50,12 @@ export default function UserDashboard() {
             {/* Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { title: 'Total Revenue', value: '$45,231.89', change: '+20.1% from last month', icon: DollarSign },
-                    { title: 'Subscriptions', value: '+2350', change: '+180.1% from last month', icon: Users },
-                    { title: 'Sales', value: '+12,234', change: '+19% from last month', icon: CreditCard },
-                    { title: 'Active Now', value: '+573', change: '+201 since last hour', icon: Activity },
+                    { title: 'Total Revenue', value: '$0.00', change: 'No payment data', icon: DollarSign },
+                    { title: 'Total Users', value: loading ? '...' : stats.totalUsers, change: 'Registered Accounts', icon: Users },
+                    { title: 'Active Users', value: loading ? '...' : stats.activeUsers, change: 'Approved Accounts', icon: Activity },
+                    { title: 'New Signups', value: loading ? '...' : (stats.recentSignups.length > 0 ? `+${stats.recentSignups.length}` : '0'), change: 'Recent Activity', icon: UserPlus },
                 ].map((metric, i) => (
-                    <Card key={i} className="hover:border-orange-500/30 transition-colors group">
+                    <Card key={i} className="hover:border-orange-500/30 transition-colors group border-white/10 shadow-lg glow-orange">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-gray-400 group-hover:text-white transition-colors">
                                 {metric.title}
