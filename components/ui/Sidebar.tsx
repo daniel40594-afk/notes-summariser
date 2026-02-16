@@ -11,7 +11,9 @@ import {
     LogOut,
     ChevronLeft,
     Menu,
-    Users
+    Users,
+    FileText,
+    Bot
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -27,6 +29,8 @@ export default function Sidebar() {
     const navItems = [
         { name: 'Dashboard', href: '/user', icon: LayoutDashboard },
         { name: 'AI Study Tool', href: '/study', icon: BookOpen },
+        { name: 'Documents', href: '/documents', icon: FileText },
+        { name: 'Document Chat', href: '/chat', icon: Bot },
         { name: 'User Management', href: '/admin', icon: Users },
         { name: 'Settings', href: '/user/settings', icon: Settings }, // Placeholder
     ];
