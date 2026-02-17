@@ -48,6 +48,15 @@ export const extractText = async (fileBuffer: Buffer, fileType: string, filename
 
     if (fileType === 'application/pdf') {
         // Lazy load pdf-parse
+        // 1. Polyfill for standard PDF.js in Node
+        if (!global.DOMMatrix) {
+            // @ts-ignore
+            global.DOMMatrix = class DOMMatrix {
+                a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
+                constructor() { }
+            };
+        }
+
         // @ts-ignore
         const pdfModule = require('pdf-parse');
         const pdf = pdfModule.PDFParse || (typeof pdfModule === 'function' ? pdfModule : pdfModule.default);
