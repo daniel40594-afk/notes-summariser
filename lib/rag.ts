@@ -77,12 +77,8 @@ export const extractText = async (fileBuffer: Buffer, fileType: string, filename
                 }
             }
 
-            if (data && data.text && data.text.trim().length > 50) {
-                return data.text;
-            } else {
-                console.log('[RAG] PDF has little text. Attempting OCR...');
-                throw new Error('Scanned PDF detected. Please upload as images for OCR or use a text-based PDF.');
-            }
+            // Relaxed check: Return text if found, even if short. Ignore images.
+            return data?.text || '';
         } catch (e: any) {
             console.error('PDF Parse Error:', e);
             throw new Error(`Failed to parse PDF: ${e.message || e}`);
