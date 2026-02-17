@@ -34,6 +34,11 @@ export default function DocumentsPage() {
         e.preventDefault();
         if (!file) return;
 
+        if (file.size > 4.5 * 1024 * 1024) {
+            alert('File too large. Maximum size is 4.5MB.');
+            return;
+        }
+
         setUploading(true);
         const formData = new FormData();
         formData.append('file', file);
@@ -47,11 +52,14 @@ export default function DocumentsPage() {
             if (res.ok) {
                 setFile(null);
                 fetchDocuments(); // Refresh list
+                alert('Upload successful!');
             } else {
-                alert('Upload failed');
+                const data = await res.json();
+                alert(`Upload failed: ${data.error || 'Unknown error'}`);
             }
         } catch (error) {
-            alert('Upload error');
+            console.error(error);
+            alert('Upload error: Network or Server issue');
         } finally {
             setUploading(false);
         }
