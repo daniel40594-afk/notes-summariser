@@ -12,12 +12,27 @@ export async function GET(req: NextRequest) {
         const decoded: any = jwt.decode(token);
         const userId = decoded?.userId;
 
+        const { searchParams } = new URL(req.url);
+        const workspaceId = searchParams.get('workspaceId');
+
         const client = await pool.connect();
         try {
-            const result = await client.query(
-                'SELECT * FROM documents WHERE user_id = $1 ORDER BY uploaded_at DESC',
-                [userId]
-            );
+            let query = 'SELECT * FROM documents WHERE user_id = $1';
+            const params: any[] = [userId];
+
+            if (workspaceId) {
+                query += ' AND workspace_id = $2';
+                params.push(workspaceId);
+            } else {
+                // If no workspaceId, maybe return only uncategorized? 
+                // Or all? Let's return all for "All Documents" view, 
+                // but usually we want to filter by workspace in the workspace view.
+                // Existing behavior (no workspaceId) returns all, which is fine for "Documents" page.
+            }
+
+            query += ' ORDER BY uploaded_at DESC';
+
+            const result = await client.query(query, params);
             return NextResponse.json({ documents: result.rows });
         } finally {
             client.release();

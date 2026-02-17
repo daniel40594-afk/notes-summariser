@@ -15,13 +15,13 @@ export async function POST(req: NextRequest) {
         const token = req.cookies.get('token')?.value;
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        const { question, sessionId } = await req.json();
+        const { question, sessionId, workspaceId } = await req.json();
 
         if (!question) return NextResponse.json({ error: 'Question required' }, { status: 400 });
 
         // 1. Retrieve Context
-        console.log(`[Chat API] Retrieval for: "${question}"`);
-        const results = await searchSimilarChunks(question, 5);
+        console.log(`[Chat API] Retrieval for: "${question}" (Workspace: ${workspaceId || 'All'})`);
+        const results = await searchSimilarChunks(question, workspaceId, 5);
 
         const contextText = results.map(r => `[source: ${r.chunk.metadata.filename}]\n${r.chunk.content}`).join('\n\n');
         console.log(`[Chat API] Retrieved ${results.length} chunks.`);

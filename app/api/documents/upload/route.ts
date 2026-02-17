@@ -27,12 +27,13 @@ export async function POST(req: NextRequest) {
         // 2. Parse Form Data
         const formData = await req.formData();
         const file = formData.get('file') as File;
+        const workspaceId = formData.get('workspaceId') as string | null;
 
         if (!file) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
 
-        console.log(`[Upload API] Processing file: ${file.name}, type: ${file.type}, size: ${file.size}`);
+        console.log(`[Upload API] Processing file: ${file.name}, type: ${file.type}, size: ${file.size}, workspace: ${workspaceId}`);
 
         // 3. Database Entry for Document
         const client = await pool.connect();
@@ -40,8 +41,8 @@ export async function POST(req: NextRequest) {
 
         try {
             await client.query(
-                'INSERT INTO documents (id, user_id, filename, file_type, file_size) VALUES ($1, $2, $3, $4, $5)',
-                [documentId, userId, file.name, file.type, file.size]
+                'INSERT INTO documents (id, user_id, filename, file_type, file_size, workspace_id) VALUES ($1, $2, $3, $4, $5, $6)',
+                [documentId, userId, file.name, file.type, file.size, workspaceId || null]
             );
         } finally {
             client.release();

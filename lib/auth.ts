@@ -20,3 +20,16 @@ export async function verifyToken(token: string) {
         return null;
     }
 }
+
+export async function verifyAuth(token: string | undefined) {
+    if (!token) return null;
+    const payload = await verifyToken(token);
+    if (!payload) return null;
+    // Normalize payload to have 'id' if currently 'userId'
+    return {
+        id: (payload.userId || payload.sub) as string,
+        email: payload.email as string,
+        role: payload.role as string,
+        ...payload
+    };
+}

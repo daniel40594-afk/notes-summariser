@@ -159,20 +159,29 @@ export const processDocument = async (
 };
 
 // --- Retrieval ---
-export const searchSimilarChunks = async (query: string, topK: number = 5): Promise<SearchResult[]> => {
+// --- Retrieval ---
+export const searchSimilarChunks = async (query: string, workspaceId?: string, topK: number = 5): Promise<SearchResult[]> => {
     const queryEmbedding = await generateEmbedding(query);
 
-    // Fetch all chunks from DB (Playground scale: fetch all to memory)
+    // Fetch chunks from DB
     const client = await pool.connect();
     let chunks: DocumentChunk[] = [];
 
     try {
-        const res = await client.query('SELECT id, document_id, content, embedding, metadata FROM document_chunks');
+        let queryText = 'SELECT dc.id, dc.document_id, dc.content, dc.embedding, dc.metadata FROM document_chunks dc';
+        const params: any[] = [];
+
+        if (workspaceId) {
+            queryText += ' JOIN documents d ON dc.document_id = d.id WHERE d.workspace_id = $1';
+            params.push(workspaceId);
+        }
+
+        const res = await client.query(queryText, params);
         chunks = res.rows.map(row => ({
             id: row.id,
             documentId: row.document_id,
             content: row.content,
-            embedding: row.embedding, // database returns parsed JSONB object (array of numbers) automatically? or needs parsing? pg usually returns auto-parsed for JSONB.
+            embedding: row.embedding,
             metadata: row.metadata
         }));
     } finally {

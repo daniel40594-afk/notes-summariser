@@ -12,7 +12,8 @@ import {
     ChevronLeft,
     Users,
     FileText,
-    Bot
+    Bot,
+    Folder
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -27,11 +28,11 @@ export default function Sidebar() {
 
     const navItems = [
         { name: 'Dashboard', href: '/user', icon: LayoutDashboard },
+        { name: 'Workspaces', href: '/workspaces', icon: Folder }, // New
+        { name: 'All Documents', href: '/documents', icon: FileText },
         { name: 'AI Study Tool', href: '/study', icon: BookOpen },
-        { name: 'Documents', href: '/documents', icon: FileText },
-        { name: 'Document Chat', href: '/chat', icon: Bot },
         { name: 'User Management', href: '/admin', icon: Users },
-        { name: 'Settings', href: '/user/settings', icon: Settings }, // Placeholder
+        // Settings moved to footer manually
     ];
 
     return (
@@ -42,33 +43,57 @@ export default function Sidebar() {
             )}
         >
             <div className="flex flex-col h-full relative">
-                {/* Header / Toggle */}
-                <div className="flex items-center justify-between p-4 h-16 border-b border-white/5">
-                    <div className={cn("flex items-center gap-3 overflow-hidden transition-all duration-300", collapsed ? "justify-center w-full" : "justify-start")}>
-                        <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center glow-orange">
-                            <span className="text-white font-bold text-lg">C</span>
+                {/* Header / User Profile (Moved to TOP) */}
+                <div className="p-4 border-b border-white/5">
+                    <div className={cn("flex items-center gap-3", collapsed ? "justify-center" : "")}>
+                        <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center glow-orange relative group cursor-pointer">
+                            <span className="text-white font-bold text-lg">D</span>
+                            {/* User Tooltip */}
+                            {collapsed && (
+                                <div className="absolute left-full ml-4 px-3 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
+                                    Daniel (Pro)
+                                </div>
+                            )}
                         </div>
-                        <span className={cn("font-bold text-xl text-white tracking-tight whitespace-nowrap transition-all duration-300 origin-left", collapsed ? "opacity-0 w-0 scale-0" : "opacity-100 w-auto scale-100")}>
-                            Celestial
-                        </span>
+                        <div className={cn("flex-1 overflow-hidden transition-all duration-300", collapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100")}>
+                            <p className="text-sm font-bold text-white truncate">Daniel</p>
+                            <p className="text-xs text-gray-400 truncate">Pro Plan</p>
+                        </div>
+                        {/* Collapse Toggle (Desktop) */}
+                        <button
+                            onClick={() => setCollapsed(!collapsed)}
+                            className={cn(
+                                "p-1 rounded-full text-gray-500 hover:text-white transition-colors hidden md:flex items-center justify-center",
+                                collapsed ? "hidden" : "ml-auto"
+                            )}
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
                     </div>
-
-                    <button
-                        onClick={() => setCollapsed(!collapsed)}
-                        className={cn(
-                            "absolute right-[-12px] top-6 p-1 rounded-full bg-zinc-800 text-gray-400 hover:text-white border border-white/10 transition-colors hidden md:flex items-center justify-center z-50",
-                        )}
-                    >
-                        <ChevronLeft className={cn("w-4 h-4 transition-transform duration-300", collapsed && "rotate-180")} />
-                    </button>
                 </div>
 
-                {/* Header / Toggle */}
-
                 {/* Navigation */}
-                <div className="flex-1 py-6 px-3 space-y-2 overflow-y-auto">
+                <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+                    {/* Collapsed Toggle Button (When collapsed, show at top of nav or separately?) 
+                        Actually, let's keep the Chevron logic simple above or below. 
+                        If collapsed, the header is just the avatar. 
+                        Let's put the toggle button outside or below user if needed. 
+                        For now, clicking the avatar or a separate button could toggle? 
+                        The user asked for "User at top". 
+                        Let's keep the existing toggle button logic but adapted.
+                    */}
+                    {/* Toggle Button for Collapsed State */}
+                    {collapsed && (
+                        <button
+                            onClick={() => setCollapsed(false)}
+                            className="mx-auto mb-4 p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors flex justify-center w-full"
+                        >
+                            <ChevronLeft className="w-4 h-4 rotate-180" />
+                        </button>
+                    )}
+
                     {navItems.map((item) => {
-                        const isActive = pathname === item.href;
+                        const isActive = pathname === item.href || (item.href !== '/user' && pathname.startsWith(item.href));
                         return (
                             <Link
                                 key={item.name}
@@ -87,7 +112,7 @@ export default function Sidebar() {
 
                                 {/* Tooltip for collapsed state */}
                                 {collapsed && (
-                                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                                    <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
                                         {item.name}
                                     </div>
                                 )}
@@ -96,27 +121,42 @@ export default function Sidebar() {
                     })}
                 </div>
 
-                {/* Footer / User */}
-                <div className="p-4 border-t border-white/5">
-                    <div className={cn("flex items-center gap-3", collapsed ? "justify-center" : "")}>
-                        <div className="w-9 h-9 shrink-0 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center">
-                            <span className="text-gray-400 text-sm font-medium">JD</span>
-                        </div>
-                        <div className={cn("flex-1 overflow-hidden transition-all duration-300", collapsed ? "w-0 opacity-0" : "w-auto opacity-100")}>
-                            <p className="text-sm font-medium text-white truncate">John Doe</p>
-                            <p className="text-xs text-gray-500 truncate">Pro Plan</p>
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className={cn(
-                                "text-gray-400 hover:text-red-400 transition-colors",
-                                collapsed ? "hidden group-hover:block absolute" : ""
-                            )}
-                            title="Sign Out"
-                        >
-                            <LogOut className="w-5 h-5" />
-                        </button>
-                    </div>
+                {/* Footer / Settings & Logout (Moved to BOTTOM) */}
+                <div className="p-3 border-t border-white/5 space-y-1">
+                    <Link
+                        href="/user/settings"
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative text-gray-400 hover:text-white hover:bg-white/5",
+                            pathname === '/user/settings' && "bg-white/5 text-white"
+                        )}
+                    >
+                        <Settings className="w-5 h-5 shrink-0" />
+                        <span className={cn("font-medium whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
+                            Settings
+                        </span>
+                        {collapsed && (
+                            <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                                Settings
+                            </div>
+                        )}
+                    </Link>
+
+                    <button
+                        onClick={handleLogout}
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative text-gray-400 hover:text-red-400 hover:bg-red-500/10 w-full",
+                        )}
+                    >
+                        <LogOut className="w-5 h-5 shrink-0" />
+                        <span className={cn("font-medium whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
+                            Sign Out
+                        </span>
+                        {collapsed && (
+                            <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                                Sign Out
+                            </div>
+                        )}
+                    </button>
                 </div>
             </div>
         </aside>
