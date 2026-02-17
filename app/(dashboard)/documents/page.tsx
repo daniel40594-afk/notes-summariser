@@ -110,7 +110,7 @@ export default function DocumentsPage() {
                                 className="bg-black/20 text-white border-white/10 file:bg-orange-600 file:border-0 file:rounded-md file:text-white file:px-2 file:mr-4 hover:file:bg-orange-500 cursor-pointer"
                                 accept=".pdf,.docx,.txt,.png,.jpg,.jpeg"
                             />
-                            <p className="text-xs text-gray-500">Supported: PDF, DOCX, TXT, Images (OCR)</p>
+                            <p className="text-xs text-gray-500">Supported: PDF, DOCX, TXT, Images (OCR). Max size: 4.5MB.</p>
                         </div>
                         <Button type="submit" disabled={!file || uploading} className="bg-gradient-orange text-white">
                             {uploading ? <Loader2 className="animate-spin" /> : 'Upload & Process'}
