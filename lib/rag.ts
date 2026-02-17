@@ -83,9 +83,9 @@ export const extractText = async (fileBuffer: Buffer, fileType: string, filename
                 console.log('[RAG] PDF has little text. Attempting OCR...');
                 throw new Error('Scanned PDF detected. Please upload as images for OCR or use a text-based PDF.');
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error('PDF Parse Error:', e);
-            throw new Error('Failed to parse PDF.');
+            throw new Error(`Failed to parse PDF: ${e.message || e}`);
         }
     }
     else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') { // docx
