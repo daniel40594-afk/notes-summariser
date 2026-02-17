@@ -10,7 +10,6 @@ import {
     Settings,
     LogOut,
     ChevronLeft,
-    Menu,
     Users,
     FileText,
     Bot
@@ -64,17 +63,7 @@ export default function Sidebar() {
                     </button>
                 </div>
 
-                {/* Mobile Collapse Button (Only shown when collapsed to expand) */}
-                {collapsed && (
-                    <div className="flex justify-center py-2 md:block hidden">
-                        <button
-                            onClick={() => setCollapsed(false)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                        >
-                            <Menu className="w-5 h-5" />
-                        </button>
-                    </div>
-                )}
+                {/* Header / Toggle */}
 
                 {/* Navigation */}
                 <div className="flex-1 py-6 px-3 space-y-2 overflow-y-auto">
