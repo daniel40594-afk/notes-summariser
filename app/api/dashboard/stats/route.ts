@@ -1,8 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import pool from '@/lib/db';
+import { verifyAuth } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
+        const token = req.cookies.get('token')?.value;
+        const verified = await verifyAuth(token);
+
+        // Default role if not verified (though middleware should catch this)
+        let role = 'user';
+
+        if (verified) {
+            const userRes = await pool.query('SELECT role FROM users WHERE id = $1', [verified.id]);
+            if (userRes.rows.length > 0) {
+                role = userRes.rows[0].role;
+            }
+        }
+
         const client = await pool.connect();
 
         // 1. Total Users
@@ -27,7 +41,8 @@ export async function GET() {
         return NextResponse.json({
             totalUsers,
             activeUsers,
-            recentSignups
+            recentSignups,
+            role
         });
 
     } catch (error) {

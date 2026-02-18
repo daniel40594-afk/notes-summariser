@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -9,17 +9,30 @@ import {
     BookOpen,
     Settings,
     LogOut,
-    ChevronLeft,
+    Menu,
     Users,
     FileText,
-    Bot,
     Folder
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 
 export default function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
+    const [role, setRole] = useState('user');
     const pathname = usePathname();
+
+    useEffect(() => {
+        // Fetch user role for sidebar visibility
+        const fetchUser = async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.user) setRole(data.user.role);
+                }
+            } catch (e) { console.error(e); }
+        };
+        fetchUser();
+    }, []);
 
     const handleLogout = () => {
         document.cookie = 'token=; Max-Age=0; path=/;';
@@ -28,12 +41,15 @@ export default function Sidebar() {
 
     const navItems = [
         { name: 'Dashboard', href: '/user', icon: LayoutDashboard },
-        { name: 'Workspaces', href: '/workspaces', icon: Folder }, // New
+        { name: 'Workspaces', href: '/workspaces', icon: Folder },
         { name: 'All Documents', href: '/documents', icon: FileText },
         { name: 'AI Study Tool', href: '/study', icon: BookOpen },
-        { name: 'User Management', href: '/admin', icon: Users },
-        // Settings moved to footer manually
     ];
+
+    // Only add User Management if admin
+    if (role === 'admin') {
+        navItems.push({ name: 'User Management', href: '/admin', icon: Users });
+    }
 
     return (
         <aside
@@ -43,55 +59,54 @@ export default function Sidebar() {
             )}
         >
             <div className="flex flex-col h-full relative">
-                {/* Header / User Profile (Moved to TOP) */}
+                {/* Header Section */}
                 <div className="p-4 border-b border-white/5">
-                    <div className={cn("flex items-center gap-3", collapsed ? "justify-center" : "")}>
-                        <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center glow-orange relative group cursor-pointer">
-                            <span className="text-white font-bold text-lg">D</span>
-                            {/* User Tooltip */}
-                            {collapsed && (
+                    {/* Collapsed Layout: Menu Icon TOP, Profile BELOW */}
+                    {collapsed ? (
+                        <div className="flex flex-col items-center gap-6">
+                            {/* Menu Icon (Toggle) */}
+                            <button
+                                onClick={() => setCollapsed(!collapsed)}
+                                className="p-2 rounded-lg text-gray-500 hover:text-white transition-colors"
+                            >
+                                <Menu className="w-6 h-6" />
+                            </button>
+
+                            {/* Profile Avatar */}
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center glow-orange cursor-pointer group relative">
+                                <span className="text-white font-bold text-lg">D</span>
+                                {/* Hover Tooltip */}
                                 <div className="absolute left-full ml-4 px-3 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
-                                    Daniel (Pro)
+                                    Daniel ({role === 'admin' ? 'Admin' : 'Pro'})
                                 </div>
-                            )}
+                            </div>
                         </div>
-                        <div className={cn("flex-1 overflow-hidden transition-all duration-300", collapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100")}>
-                            <p className="text-sm font-bold text-white truncate">Daniel</p>
-                            <p className="text-xs text-gray-400 truncate">Pro Plan</p>
+                    ) : (
+                        /* Expanded Layout: Menu Icon NEXT TO Profile Name */
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center glow-orange overflow-hidden">
+                                <span className="text-white font-bold text-lg">D</span>
+                            </div>
+
+                            <div className="flex-1 overflow-hidden">
+                                <div className="flex items-center gap-2">
+                                    <p className="text-sm font-bold text-white truncate">Daniel</p>
+                                    {/* Menu Icon (Toggle) Next to Name */}
+                                    <button
+                                        onClick={() => setCollapsed(!collapsed)}
+                                        className="p-1 rounded-full text-gray-500 hover:text-white transition-colors ml-auto"
+                                    >
+                                        <Menu className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-400 truncate capitalize">{role} Plan</p>
+                            </div>
                         </div>
-                        {/* Collapse Toggle (Desktop) */}
-                        <button
-                            onClick={() => setCollapsed(!collapsed)}
-                            className={cn(
-                                "p-1 rounded-full text-gray-500 hover:text-white transition-colors hidden md:flex items-center justify-center",
-                                collapsed ? "hidden" : "ml-auto"
-                            )}
-                        >
-                            <ChevronLeft className="w-4 h-4" />
-                        </button>
-                    </div>
+                    )}
                 </div>
 
                 {/* Navigation */}
                 <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-                    {/* Collapsed Toggle Button (When collapsed, show at top of nav or separately?) 
-                        Actually, let's keep the Chevron logic simple above or below. 
-                        If collapsed, the header is just the avatar. 
-                        Let's put the toggle button outside or below user if needed. 
-                        For now, clicking the avatar or a separate button could toggle? 
-                        The user asked for "User at top". 
-                        Let's keep the existing toggle button logic but adapted.
-                    */}
-                    {/* Toggle Button for Collapsed State */}
-                    {collapsed && (
-                        <button
-                            onClick={() => setCollapsed(false)}
-                            className="mx-auto mb-4 p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors flex justify-center w-full"
-                        >
-                            <ChevronLeft className="w-4 h-4 rotate-180" />
-                        </button>
-                    )}
-
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || (item.href !== '/user' && pathname.startsWith(item.href));
                         return (
@@ -102,7 +117,8 @@ export default function Sidebar() {
                                     "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative",
                                     isActive
                                         ? "bg-gradient-orange text-white shadow-lg shadow-orange-500/20"
-                                        : "text-gray-400 hover:text-white hover:bg-white/5"
+                                        : "text-gray-400 hover:text-white hover:bg-white/5",
+                                    collapsed && "justify-center"
                                 )}
                             >
                                 <item.icon className={cn("w-5 h-5 shrink-0", isActive && "animate-pulse-glow")} />
@@ -121,13 +137,14 @@ export default function Sidebar() {
                     })}
                 </div>
 
-                {/* Footer / Settings & Logout (Moved to BOTTOM) */}
+                {/* Footer */}
                 <div className="p-3 border-t border-white/5 space-y-1">
                     <Link
                         href="/user/settings"
                         className={cn(
                             "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative text-gray-400 hover:text-white hover:bg-white/5",
-                            pathname === '/user/settings' && "bg-white/5 text-white"
+                            pathname === '/user/settings' && "bg-white/5 text-white",
+                            collapsed && "justify-center"
                         )}
                     >
                         <Settings className="w-5 h-5 shrink-0" />
@@ -145,6 +162,7 @@ export default function Sidebar() {
                         onClick={handleLogout}
                         className={cn(
                             "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative text-gray-400 hover:text-red-400 hover:bg-red-500/10 w-full",
+                            collapsed && "justify-center"
                         )}
                     >
                         <LogOut className="w-5 h-5 shrink-0" />

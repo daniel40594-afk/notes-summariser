@@ -108,7 +108,7 @@ export async function POST(request: Request) {
         if (!transcriptText || transcriptText.trim().length < 50) {
             console.error('[Study API] Failed to extract any content (transcript or metadata).');
             return NextResponse.json({
-                error: 'Could not extract content. The video might be blocked, private, or missing captions.'
+                error: 'Study notes could not be generated for this video. This may be due to transcript availability or Restricted access.'
             }, { status: 422 });
         }
 
