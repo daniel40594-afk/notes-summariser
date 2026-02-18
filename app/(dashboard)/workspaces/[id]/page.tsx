@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { FileText, Trash2, Upload, Loader2, File, FileImage, Send, Bot, User, MessageSquare } from 'lucide-react';
+import { FileText, Trash2, Upload, Loader2, File, FileImage, Send, Bot, User, MessageSquare, Globe } from 'lucide-react';
 
 export default function WorkspaceDetailPage() {
     const params = useParams();
@@ -21,6 +21,7 @@ export default function WorkspaceDetailPage() {
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
     const [loadingChat, setLoadingChat] = useState(false);
+    const [deepSearch, setDeepSearch] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Active Tab
@@ -104,7 +105,7 @@ export default function WorkspaceDetailPage() {
             const res = await fetch('/api/chat/rag', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: userMsg.content, workspaceId })
+                body: JSON.stringify({ question: userMsg.content, workspaceId, deepSearch })
             });
 
             if (!res.ok) throw new Error('Failed');
@@ -258,8 +259,8 @@ export default function WorkspaceDetailPage() {
                                 {messages.map((msg, idx) => (
                                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                         <div className={`max-w-[80%] rounded-2xl p-4 ${msg.role === 'user'
-                                                ? 'bg-gradient-orange text-white rounded-br-none'
-                                                : 'bg-white/10 text-gray-200 rounded-bl-none border border-white/5'
+                                            ? 'bg-gradient-orange text-white rounded-br-none'
+                                            : 'bg-white/10 text-gray-200 rounded-bl-none border border-white/5'
                                             }`}>
                                             <div className="flex items-center gap-2 mb-1 opacity-70 text-xs uppercase tracking-wider font-bold">
                                                 {msg.role === 'user' ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
@@ -273,7 +274,20 @@ export default function WorkspaceDetailPage() {
                             </div>
 
                             {/* Input Area */}
-                            <div className="p-4 border-t border-white/10 bg-black/20">
+                            <div className="p-4 border-t border-white/10 bg-black/20 space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setDeepSearch(!deepSearch)}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${deepSearch
+                                                ? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
+                                                : 'bg-white/5 border-white/10 text-gray-500 hover:text-gray-300'
+                                            }`}
+                                    >
+                                        <Globe className="w-3 h-3" />
+                                        Deep Search {deepSearch ? 'On' : 'Off'}
+                                    </button>
+                                </div>
                                 <form onSubmit={handleSend} className="relative flex items-center gap-2">
                                     <Input
                                         value={input}
