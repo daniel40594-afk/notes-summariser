@@ -1,16 +1,14 @@
 
 import pool from '@/lib/db';
-import { deleteDocumentFromStore } from '@/lib/rag';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { verifyAuth } from '@/lib/auth';
 
 // GET: List documents
 export async function GET(req: NextRequest) {
     try {
         const token = req.cookies.get('token')?.value;
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        const decoded: any = jwt.decode(token);
-        const userId = decoded?.userId;
+        const user = await verifyAuth(token);
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const { searchParams } = new URL(req.url);
         const workspaceId = searchParams.get('workspaceId');
@@ -18,16 +16,11 @@ export async function GET(req: NextRequest) {
         const client = await pool.connect();
         try {
             let query = 'SELECT * FROM documents WHERE user_id = $1';
-            const params: any[] = [userId];
+            const params: any[] = [user.id];
 
             if (workspaceId) {
                 query += ' AND workspace_id = $2';
                 params.push(workspaceId);
-            } else {
-                // If no workspaceId, maybe return only uncategorized? 
-                // Or all? Let's return all for "All Documents" view, 
-                // but usually we want to filter by workspace in the workspace view.
-                // Existing behavior (no workspaceId) returns all, which is fine for "Documents" page.
             }
 
             query += ' ORDER BY uploaded_at DESC';
@@ -38,6 +31,7 @@ export async function GET(req: NextRequest) {
             client.release();
         }
     } catch (error) {
+        console.error('Documents GET error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -46,9 +40,8 @@ export async function GET(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
     try {
         const token = req.cookies.get('token')?.value;
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        const decoded: any = jwt.decode(token);
-        const userId = decoded?.userId;
+        const user = await verifyAuth(token);
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const { searchParams } = new URL(req.url);
         const documentId = searchParams.get('id');
@@ -60,13 +53,12 @@ export async function DELETE(req: NextRequest) {
             // Verify ownership
             const docCheck = await client.query('SELECT user_id FROM documents WHERE id = $1', [documentId]);
             if (docCheck.rows.length === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-            if (docCheck.rows[0].user_id !== userId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-            // Delete from DB (Cascade will delete chunks, but we have helper purely for abstraction if needed)
-            // Actually Cascade ON DELETE CASCADE in init-rag-db will handle chunks deletion from DB.
-            // But we should verify. 
-            // In init-rag-db: document_id UUID REFERENCES documents(id) ON DELETE CASCADE
-            // So just deleting document is enough.
+            // user.id is string from verifyAuth. docCheck user_id might be string or number depending on column.
+            // Safe comparison: String()
+            if (String(docCheck.rows[0].user_id) !== String(user.id)) {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
 
             await client.query('DELETE FROM documents WHERE id = $1', [documentId]);
 
@@ -75,6 +67,7 @@ export async function DELETE(req: NextRequest) {
             client.release();
         }
     } catch (error) {
+        console.error('Documents DELETE error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

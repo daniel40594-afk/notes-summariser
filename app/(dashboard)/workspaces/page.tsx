@@ -64,9 +64,12 @@ export default function WorkspacesPage() {
             const res = await fetch(`/api/workspaces/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 fetchWorkspaces();
+            } else {
+                const data = await res.json();
+                alert(`Delete failed: ${data.error || 'Server error'}`);
             }
         } catch (e) {
-            alert('Failed to delete');
+            alert('Delete failed');
         }
     };
 
@@ -109,6 +112,7 @@ export default function WorkspacesPage() {
                                         <Folder className="w-6 h-6 text-orange-500" />
                                     </div>
                                     <button
+                                        type="button"
                                         onClick={(e) => handleDelete(ws.id, e)}
                                         className="text-gray-500 hover:text-red-400 p-2 hover:bg-white/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                                     >

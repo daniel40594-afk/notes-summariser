@@ -72,9 +72,12 @@ export default function DocumentsPage() {
             const res = await fetch(`/api/documents?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
                 fetchDocuments();
+            } else {
+                const data = await res.json();
+                alert(`Delete failed: ${data.error || 'Server error'}`);
             }
         } catch (e) {
-            alert('Delete failed');
+            alert('Delete failed: Network error');
         }
     };
 
@@ -143,6 +146,7 @@ export default function DocumentsPage() {
                                         </div>
                                     </div>
                                     <button
+                                        type="button"
                                         onClick={() => handleDelete(doc.id)}
                                         className="p-2 text-gray-500 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
                                         title="Delete"

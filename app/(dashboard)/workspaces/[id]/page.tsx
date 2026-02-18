@@ -87,8 +87,13 @@ export default function WorkspaceDetailPage() {
         if (!confirm('Are you sure? This will delete the document and its index.')) return;
         try {
             const res = await fetch(`/api/documents?id=${id}`, { method: 'DELETE' });
-            if (res.ok) fetchDocuments();
-        } catch (e) { alert('Delete failed'); }
+            if (res.ok) {
+                fetchDocuments();
+            } else {
+                const data = await res.json();
+                alert(`Delete failed: ${data.error || 'Server error'}`);
+            }
+        } catch (e) { alert('Delete failed: Network error'); }
     };
 
     // Chat Logic
@@ -223,6 +228,7 @@ export default function WorkspaceDetailPage() {
                                                 </div>
                                             </div>
                                             <button
+                                                type="button"
                                                 onClick={() => handleDelete(doc.id)}
                                                 className="p-2 text-gray-500 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
                                                 title="Delete"
@@ -280,8 +286,8 @@ export default function WorkspaceDetailPage() {
                                         type="button"
                                         onClick={() => setDeepSearch(!deepSearch)}
                                         className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${deepSearch
-                                                ? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
-                                                : 'bg-white/5 border-white/10 text-gray-500 hover:text-gray-300'
+                                            ? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
+                                            : 'bg-white/5 border-white/10 text-gray-500 hover:text-gray-300'
                                             }`}
                                     >
                                         <Globe className="w-3 h-3" />
