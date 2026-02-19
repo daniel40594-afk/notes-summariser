@@ -120,9 +120,7 @@ body {
 
 :root.light-mode .bg-black,
 :root.light-mode .bg-zinc-900,
-:root.light-mode .bg-zinc-950,
-:root.light-mode .bg-[#0a0a0a],
-:root.light-mode .bg-[#111] {
+:root.light-mode .bg-zinc-950 {
   background-color: #F2EAF7 !important;
 }
 
