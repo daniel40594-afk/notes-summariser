@@ -81,7 +81,6 @@ export default function UserDashboard() {
 
                     {/* Middle Section: Graphs & Activity */}
                     <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
-
                         {/* Main Graph */}
                         <Card className="col-span-4 lg:col-span-5 relative overflow-hidden border-white/10 shadow-lg">
                             <CardHeader>
@@ -148,65 +147,87 @@ export default function UserDashboard() {
                 </>
             )}
 
-            {/* USER VIEW */}
-            {stats.role !== 'admin' && !loading && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                    {/* Tool 1: Workspaces */}
-                    <a href="/workspaces" className="group block">
-                        <Card className="h-full border-white/10 hover:border-orange-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <Folder className="w-24 h-24 text-orange-500" />
-                            </div>
-                            <CardHeader>
-                                <CardTitle className="text-white flex items-center gap-2">
-                                    <Folder className="w-6 h-6 text-orange-500" />
-                                    Workspaces
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-gray-400 mb-4">Create and manage project workspaces. Organize your documents and chats in one place.</p>
-                                <span className="text-sm text-orange-400 font-medium group-hover:underline">Go to Workspaces &rarr;</span>
-                            </CardContent>
-                        </Card>
-                    </a>
+            {/* TOOLS SECTION (Visible to ALL) */}
+            {!loading && (
+                <div className="space-y-6 mt-8">
+                    {stats.role === 'admin' && <h2 className="text-xl font-bold text-white">Application Tools</h2>}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Tool 1: Workspaces */}
+                        <a href="/workspaces" className="group block">
+                            <Card className="h-full border-white/10 hover:border-orange-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <Folder className="w-24 h-24 text-orange-500" />
+                                </div>
+                                <CardHeader>
+                                    <CardTitle className="text-white flex items-center gap-2">
+                                        <Folder className="w-6 h-6 text-orange-500" />
+                                        Workspaces
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-gray-400 mb-4">Create and manage project workspaces. Organize your documents and chats in one place.</p>
+                                    <span className="text-sm text-orange-400 font-medium group-hover:underline">Go to Workspaces &rarr;</span>
+                                </CardContent>
+                            </Card>
+                        </a>
 
-                    {/* Tool 2: All Documents */}
-                    <a href="/documents" className="group block">
-                        <Card className="h-full border-white/10 hover:border-blue-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <FileText className="w-24 h-24 text-blue-500" />
-                            </div>
-                            <CardHeader>
-                                <CardTitle className="text-white flex items-center gap-2">
-                                    <FileText className="w-6 h-6 text-blue-500" />
-                                    Document Chat
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-gray-400 mb-4">Upload PDFs, DOCX, or Images and chat with them using our advanced RAG system.</p>
-                                <span className="text-sm text-blue-400 font-medium group-hover:underline">Manage Documents &rarr;</span>
-                            </CardContent>
-                        </Card>
-                    </a>
+                        {/* Tool 2: Deep Search - NEW */}
+                        <a href="/chat?deepSearch=true" className="group block">
+                            <Card className="h-full border-white/10 hover:border-cyan-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <Activity className="w-24 h-24 text-cyan-500" />
+                                </div>
+                                <CardHeader>
+                                    <CardTitle className="text-white flex items-center gap-2">
+                                        <Activity className="w-6 h-6 text-cyan-500" />
+                                        Deep Search
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-gray-400 mb-4">Search the entire web for real-time information and answers.</p>
+                                    <span className="text-sm text-cyan-400 font-medium group-hover:underline">Start Searching &rarr;</span>
+                                </CardContent>
+                            </Card>
+                        </a>
 
-                    {/* Tool 3: AI Study Tool */}
-                    <a href="/study" className="group block">
-                        <Card className="h-full border-white/10 hover:border-purple-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <BookOpen className="w-24 h-24 text-purple-500" />
-                            </div>
-                            <CardHeader>
-                                <CardTitle className="text-white flex items-center gap-2">
-                                    <BookOpen className="w-6 h-6 text-purple-500" />
-                                    AI Study Tool
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-gray-400 mb-4">Turn YouTube videos into structured study notes and summaries instantly with AI.</p>
-                                <span className="text-sm text-purple-400 font-medium group-hover:underline">Start Studying &rarr;</span>
-                            </CardContent>
-                        </Card>
-                    </a>
+                        {/* Tool 3: All Documents */}
+                        <a href="/documents" className="group block">
+                            <Card className="h-full border-white/10 hover:border-blue-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <FileText className="w-24 h-24 text-blue-500" />
+                                </div>
+                                <CardHeader>
+                                    <CardTitle className="text-white flex items-center gap-2">
+                                        <FileText className="w-6 h-6 text-blue-500" />
+                                        Document Chat
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-gray-400 mb-4">Upload PDFs, DOCX, or Images and chat with them using our advanced RAG system.</p>
+                                    <span className="text-sm text-blue-400 font-medium group-hover:underline">Manage Documents &rarr;</span>
+                                </CardContent>
+                            </Card>
+                        </a>
+
+                        {/* Tool 4: AI Study Tool */}
+                        <a href="/study" className="group block">
+                            <Card className="h-full border-white/10 hover:border-purple-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <BookOpen className="w-24 h-24 text-purple-500" />
+                                </div>
+                                <CardHeader>
+                                    <CardTitle className="text-white flex items-center gap-2">
+                                        <BookOpen className="w-6 h-6 text-purple-500" />
+                                        AI Study Tool
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-gray-400 mb-4">Turn YouTube videos into structured study notes and summaries instantly with AI.</p>
+                                    <span className="text-sm text-purple-400 font-medium group-hover:underline">Start Studying &rarr;</span>
+                                </CardContent>
+                            </Card>
+                        </a>
+                    </div>
                 </div>
             )}
         </div>
