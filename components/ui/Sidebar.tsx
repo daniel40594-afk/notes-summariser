@@ -107,97 +107,98 @@ export default function Sidebar() {
                     )}
                 </div>
 
-            </div>
 
-            {/* Search Bar - Only Visible When Expanded */}
-            {!collapsed && (
-                <div className="px-3 pb-2 animate-fade-in">
-                    <form action="/chat" method="GET" className="relative group">
-                        <input
-                            type="text"
-                            name="initialQuery"
-                            placeholder="Search web..."
-                            className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-9 pr-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50 transition-colors"
-                        />
-                        <div className="absolute left-3 top-2.5 text-gray-500 group-focus-within:text-orange-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                        </div>
-                        <input type="hidden" name="deepSearch" value="true" />
-                    </form>
-                </div>
-            )}
 
-            {/* Navigation */}
-            <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-                {navItems.map((item) => {
-                    const safePathname = pathname || '';
-                    const isActive = safePathname === item.href || (item.href !== '/user' && safePathname.startsWith(item.href));
-                    return (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className={cn(
-                                "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative",
-                                isActive
-                                    ? "bg-gradient-orange text-white shadow-lg shadow-orange-500/20"
-                                    : "text-gray-400 hover:text-white hover:bg-white/5",
-                                collapsed && "justify-center"
-                            )}
-                        >
-                            <item.icon className={cn("w-5 h-5 shrink-0", isActive && "animate-pulse-glow")} />
-                            <span className={cn("font-medium whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
-                                {item.name}
-                            </span>
+                {/* Search Bar - Only Visible When Expanded */}
+                {!collapsed && (
+                    <div className="px-3 pb-2 animate-fade-in">
+                        <form action="/chat" method="GET" className="relative group">
+                            <input
+                                type="text"
+                                name="initialQuery"
+                                placeholder="Search web..."
+                                className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-9 pr-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                            />
+                            <div className="absolute left-3 top-2.5 text-gray-500 group-focus-within:text-orange-500 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                            </div>
+                            <input type="hidden" name="deepSearch" value="true" />
+                        </form>
+                    </div>
+                )}
 
-                            {/* Tooltip for collapsed state */}
-                            {collapsed && (
-                                <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                {/* Navigation */}
+                <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+                    {navItems.map((item) => {
+                        const safePathname = pathname || '';
+                        const isActive = safePathname === item.href || (item.href !== '/user' && safePathname.startsWith(item.href));
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={cn(
+                                    "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative",
+                                    isActive
+                                        ? "bg-gradient-orange text-white shadow-lg shadow-orange-500/20"
+                                        : "text-gray-400 hover:text-white hover:bg-white/5",
+                                    collapsed && "justify-center"
+                                )}
+                            >
+                                <item.icon className={cn("w-5 h-5 shrink-0", isActive && "animate-pulse-glow")} />
+                                <span className={cn("font-medium whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
                                     {item.name}
-                                </div>
-                            )}
-                        </Link>
-                    );
-                })}
-            </div>
+                                </span>
 
-            {/* Footer */}
-            <div className="p-3 border-t border-white/5 space-y-1">
-                <Link
-                    href="/user/settings"
-                    className={cn(
-                        "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative text-gray-400 hover:text-white hover:bg-white/5",
-                        pathname === '/user/settings' && "bg-white/5 text-white",
-                        collapsed && "justify-center"
-                    )}
-                >
-                    <Settings className="w-5 h-5 shrink-0" />
-                    <span className={cn("font-medium whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
-                        Settings
-                    </span>
-                    {collapsed && (
-                        <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                                {/* Tooltip for collapsed state */}
+                                {collapsed && (
+                                    <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                                        {item.name}
+                                    </div>
+                                )}
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* Footer */}
+                <div className="p-3 border-t border-white/5 space-y-1">
+                    <Link
+                        href="/user/settings"
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative text-gray-400 hover:text-white hover:bg-white/5",
+                            pathname === '/user/settings' && "bg-white/5 text-white",
+                            collapsed && "justify-center"
+                        )}
+                    >
+                        <Settings className="w-5 h-5 shrink-0" />
+                        <span className={cn("font-medium whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
                             Settings
-                        </div>
-                    )}
-                </Link>
+                        </span>
+                        {collapsed && (
+                            <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                                Settings
+                            </div>
+                        )}
+                    </Link>
 
-                <button
-                    onClick={handleLogout}
-                    className={cn(
-                        "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative text-gray-400 hover:text-red-400 hover:bg-red-500/10 w-full",
-                        collapsed && "justify-center"
-                    )}
-                >
-                    <LogOut className="w-5 h-5 shrink-0" />
-                    <span className={cn("font-medium whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
-                        Sign Out
-                    </span>
-                    {collapsed && (
-                        <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                    <button
+                        onClick={handleLogout}
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative text-gray-400 hover:text-red-400 hover:bg-red-500/10 w-full",
+                            collapsed && "justify-center"
+                        )}
+                    >
+                        <LogOut className="w-5 h-5 shrink-0" />
+                        <span className={cn("font-medium whitespace-nowrap transition-opacity duration-300", collapsed ? "opacity-0 w-0 hidden" : "opacity-100")}>
                             Sign Out
-                        </div>
-                    )}
-                </button>
+                        </span>
+                        {collapsed && (
+                            <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                                Sign Out
+                            </div>
+                        )}
+                    </button>
+                </div>
             </div>
         </aside>
     );
