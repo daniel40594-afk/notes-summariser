@@ -1,31 +1,50 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
-// import ReactMarkdown from 'react-markdown'; // Optional: for formatting
 
 interface Message {
     role: 'user' | 'assistant';
     content: string;
 }
 
-export default function ChatPage() {
+function ChatContent() {
+    const searchParams = useSearchParams();
+    const initialQuery = searchParams.get('initialQuery');
+    const initialDeepSearch = searchParams.get('deepSearch') === 'true';
+
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([
         { role: 'assistant', content: 'Hello! I am your document assistant. Upload documents in the Manager and ask me anything about them.' }
     ]);
     const [loading, setLoading] = useState(false);
+    const [deepSearch, setDeepSearch] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const hasRunInitialQuery = useRef(false);
+
+    useEffect(() => {
+        if (initialDeepSearch) setDeepSearch(true);
+        if (initialQuery && !hasRunInitialQuery.current) {
+            hasRunInitialQuery.current = true;
+            handleInitialSubmit(initialQuery);
+        }
+    }, [initialQuery, initialDeepSearch]);
 
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messages]);
+
+    const handleInitialSubmit = async (query: string) => {
+        setMessages(prev => [...prev, { role: 'user', content: query }]);
+        await fetchResponse(query, true); // Force deep search if from sidebar
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,19 +53,21 @@ export default function ChatPage() {
         const userMsg = input;
         setInput('');
         setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
-        setLoading(true);
+        await fetchResponse(userMsg, deepSearch);
+    };
 
+    const fetchResponse = async (question: string, isDeepSearch: boolean) => {
+        setLoading(true);
         try {
             const res = await fetch('/api/chat/rag', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: userMsg, sessionId: 'default' }) // SessionID management later
+                body: JSON.stringify({ question, sessionId: 'default', deepSearch: isDeepSearch })
             });
 
             if (!res.ok) throw new Error('Failed to fetch');
             if (!res.body) throw new Error('No body');
 
-            // Initialize assistant message
             setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
             const reader = res.body.getReader();
@@ -60,10 +81,9 @@ export default function ChatPage() {
                 const chunkValue = decoder.decode(value, { stream: true });
                 currentResponse += chunkValue;
 
-                // Update last message
                 setMessages(prev => {
                     const newMsgs = [...prev];
-                    newMsgs[newMsgs.length - 1].content = currentResponse;
+                    newMsgs[newMsgs.length - 1] = { ...newMsgs[newMsgs.length - 1], content: currentResponse };
                     return newMsgs;
                 });
             }
@@ -76,9 +96,24 @@ export default function ChatPage() {
 
     return (
         <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4 animate-fade-in-up">
-            <div>
-                <h1 className="text-3xl font-bold text-white tracking-tight">Document Chat</h1>
-                <p className="text-gray-400 mt-1">Chat with your uploaded knowledge base.</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-white tracking-tight">Document Chat</h1>
+                    <p className="text-gray-400 mt-1">Chat with your uploaded knowledge base.</p>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => setDeepSearch(!deepSearch)}
+                    className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all border",
+                        deepSearch
+                            ? "bg-orange-500/20 border-orange-500/50 text-orange-400 shadow-lg shadow-orange-500/20"
+                            : "bg-white/5 border-white/10 text-gray-500 hover:text-gray-300"
+                    )}
+                >
+                    <Globe className="w-4 h-4" />
+                    Deep Search {deepSearch ? 'On' : 'Off'}
+                </button>
             </div>
 
             <Card className="flex-1 border-white/10 bg-black/40 backdrop-blur-sm shadow-xl flex flex-col overflow-hidden relative">
@@ -123,8 +158,11 @@ export default function ChatPage() {
                         <Input
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="Ask a question about your documents..."
-                            className="bg-black/40 border-white/10 text-white placeholder:text-gray-500 focus:border-orange-500 pr-12 py-6 rounded-xl"
+                            placeholder={deepSearch ? "Ask the web..." : "Ask a question about your documents..."}
+                            className={cn(
+                                "bg-black/40 border-white/10 text-white placeholder:text-gray-500 focus:border-orange-500 pr-12 py-6 rounded-xl",
+                                deepSearch && "border-orange-500/30 focus:border-orange-500"
+                            )}
                             disabled={loading}
                         />
                         <Button
@@ -138,5 +176,13 @@ export default function ChatPage() {
                 </div>
             </Card>
         </div>
+    );
+}
+
+export default function ChatPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin w-8 h-8 text-orange-500" /></div>}>
+            <ChatContent />
+        </Suspense>
     );
 }

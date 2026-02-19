@@ -16,13 +16,13 @@ export async function POST(request: Request) {
         const user = result.rows[0];
 
         if (!user) {
-            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+            return NextResponse.json({ error: 'Email not found' }, { status: 401 });
         }
 
         // Verify password
         const isValid = await bcrypt.compare(password, user.password_hash);
         if (!isValid) {
-            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+            return NextResponse.json({ error: 'Incorrect password' }, { status: 401 });
         }
 
         // Check approval status

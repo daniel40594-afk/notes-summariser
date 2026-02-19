@@ -176,6 +176,6 @@ export async function POST(request: Request) {
 
     } catch (error: any) {
         console.error('[Study API] Internal Server Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Failed to generate notes (Unknown Error)' }, { status: 500 });
     }
 }

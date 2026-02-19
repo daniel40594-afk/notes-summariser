@@ -4,13 +4,21 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { FileText, Trash2, Upload, Loader2, File, FileImage } from 'lucide-react';
+import { FileText, Trash2, Upload, Loader2, File, FileImage, UserPlus, Image as ImageIcon, Copy, Check } from 'lucide-react';
+import Tesseract from 'tesseract.js';
 
 export default function DocumentsPage() {
-    const [file, setFile] = useState<File | null>(null);
+    // Documents State
+    const [files, setFiles] = useState<FileList | null>(null);
     const [uploading, setUploading] = useState(false);
     const [documents, setDocuments] = useState<any[]>([]);
     const [loadingDocs, setLoadingDocs] = useState(true);
+
+    // OCR State
+    const [ocrImage, setOcrImage] = useState<File | null>(null);
+    const [ocrText, setOcrText] = useState('');
+    const [ocrLoading, setOcrLoading] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     const fetchDocuments = async () => {
         try {
@@ -32,42 +40,44 @@ export default function DocumentsPage() {
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!file) return;
-
-        if (file.size > 4.5 * 1024 * 1024) {
-            alert('File too large. Maximum size is 4.5MB.');
-            return;
-        }
+        if (!files || files.length === 0) return;
 
         setUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
+        let successCount = 0;
+        let failCount = 0;
 
-        try {
-            const res = await fetch('/api/documents/upload', {
-                method: 'POST',
-                body: formData
-            });
+        // Loop through multiple files
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
 
-            if (res.ok) {
-                setFile(null);
-                fetchDocuments(); // Refresh list
-                alert('Upload successful!');
-            } else {
-                const data = await res.json();
-                alert(`Upload failed: ${data.error || 'Unknown error'}`);
+            if (file.size > 4.5 * 1024 * 1024) {
+                failCount++;
+                continue;
             }
-        } catch (error) {
-            console.error(error);
-            alert('Upload error: Network or Server issue');
-        } finally {
-            setUploading(false);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (res.ok) successCount++;
+                else failCount++;
+            } catch (error) {
+                failCount++;
+            }
         }
+
+        setFiles(null);
+        setUploading(false);
+        fetchDocuments();
+        alert(`Upload complete. Success: ${successCount}, Failed: ${failCount}`);
     };
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure? This will delete the document and its index.')) return;
-
         try {
             const res = await fetch(`/api/documents?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
@@ -76,9 +86,34 @@ export default function DocumentsPage() {
                 const data = await res.json();
                 alert(`Delete failed: ${data.error || 'Server error'}`);
             }
-        } catch (e) {
-            alert('Delete failed: Network error');
+        } catch (e) { alert('Delete failed: Network error'); }
+    };
+
+    const handleOcr = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!ocrImage) return;
+
+        setOcrLoading(true);
+        setOcrText('');
+        try {
+            const { data: { text } } = await Tesseract.recognize(
+                ocrImage,
+                'eng',
+                { logger: m => console.log(m) }
+            );
+            setOcrText(text);
+        } catch (error) {
+            alert('Failed to extract text from image');
+            console.error(error);
+        } finally {
+            setOcrLoading(false);
         }
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(ocrText);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     const getIcon = (type: string) => {
@@ -92,35 +127,77 @@ export default function DocumentsPage() {
         <div className="space-y-8 animate-fade-in-up pb-20">
             <div>
                 <h1 className="text-3xl font-bold text-white tracking-tight">Document Manager</h1>
-                <p className="text-gray-400 mt-1">Upload documents (PDF, DOCX, TXT, Images) for RAG Chat.</p>
+                <p className="text-gray-400 mt-1">Upload documents or extract text from images.</p>
             </div>
 
-            {/* Upload Section */}
-            <Card className="border-white/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-celestial-orange/5 rounded-full blur-3xl -z-0 pointer-events-none"></div>
-                <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                        <Upload className="w-5 h-5 text-orange-500" />
-                        Upload New Document
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="z-10 relative">
-                    <form onSubmit={handleUpload} className="flex gap-4 items-end">
-                        <div className="flex-1 space-y-2">
-                            <Input
-                                type="file"
-                                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                                className="bg-black/20 text-white border-white/10 file:bg-orange-600 file:border-0 file:rounded-md file:text-white file:px-2 file:mr-4 hover:file:bg-orange-500 cursor-pointer"
-                                accept=".pdf,.docx,.txt,.png,.jpg,.jpeg"
-                            />
-                            <p className="text-xs text-gray-500">Supported: PDF, DOCX, TXT, Images (OCR). Max size: 4.5MB.</p>
-                        </div>
-                        <Button type="submit" disabled={!file || uploading} className="bg-gradient-orange text-white">
-                            {uploading ? <Loader2 className="animate-spin" /> : 'Upload & Process'}
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Upload Section (Multi) */}
+                <Card className="border-white/10 relative overflow-hidden h-fit">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-celestial-orange/5 rounded-full blur-3xl -z-0 pointer-events-none"></div>
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <Upload className="w-5 h-5 text-orange-500" />
+                            Upload Documents (Multi)
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="z-10 relative">
+                        <form onSubmit={handleUpload} className="space-y-4">
+                            <div className="space-y-2">
+                                <Input
+                                    type="file"
+                                    multiple
+                                    onChange={(e) => setFiles(e.target.files)}
+                                    className="bg-black/20 text-white border-white/10 file:bg-orange-600 file:border-0 file:rounded-md file:text-white file:px-2 file:mr-4 hover:file:bg-orange-500 cursor-pointer"
+                                    accept=".pdf,.docx,.txt,.png,.jpg,.jpeg"
+                                />
+                                <p className="text-xs text-gray-500">Supported: PDF, DOCX, TXT, Images. Max 4.5MB per file.</p>
+                            </div>
+                            <Button type="submit" disabled={!files || uploading} className="w-full bg-gradient-orange text-white">
+                                {uploading ? <Loader2 className="animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                                {uploading ? 'Uploading...' : 'Upload Files'}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+
+                {/* OCR Section (Image to Text) */}
+                <Card className="border-white/10 relative overflow-hidden flex flex-col">
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <ImageIcon className="w-5 h-5 text-blue-500" />
+                            Image to Text (OCR)
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col space-y-4">
+                        <form onSubmit={handleOcr} className="flex gap-3 items-end">
+                            <div className="flex-1">
+                                <Input
+                                    type="file"
+                                    onChange={(e) => setOcrImage(e.target.files?.[0] || null)}
+                                    className="bg-black/20 text-white border-white/10 text-xs"
+                                    accept=".png,.jpg,.jpeg"
+                                />
+                            </div>
+                            <Button type="submit" disabled={!ocrImage || ocrLoading} size="sm" className="bg-blue-600 hover:bg-blue-500 text-white">
+                                {ocrLoading ? <Loader2 className="animate-spin" /> : 'Extract'}
+                            </Button>
+                        </form>
+
+                        {ocrText && (
+                            <div className="flex-1 relative bg-black/40 rounded-lg p-3 border border-white/5 min-h-[150px]">
+                                <button
+                                    onClick={copyToClipboard}
+                                    className="absolute top-2 right-2 p-1.5 rounded-md bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+                                    title="Copy Text"
+                                >
+                                    {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                                </button>
+                                <p className="text-sm text-gray-300 whitespace-pre-wrap font-mono">{ocrText}</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Documents List */}
             <div className="space-y-4">

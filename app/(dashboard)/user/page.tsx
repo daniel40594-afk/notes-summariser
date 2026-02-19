@@ -58,9 +58,8 @@ export default function UserDashboard() {
             {stats.role === 'admin' && (
                 <>
                     {/* Metric Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
-                            { title: 'Total Revenue', value: '$0.00', change: 'No payment data', icon: DollarSign },
                             { title: 'Total Users', value: loading ? '...' : stats.totalUsers, change: 'Registered Accounts', icon: Users },
                             { title: 'Active Users', value: loading ? '...' : stats.activeUsers, change: 'Approved Accounts', icon: Activity },
                             { title: 'New Signups', value: loading ? '...' : (stats.recentSignups.length > 0 ? `+${stats.recentSignups.length}` : '0'), change: 'Recent Activity', icon: UserPlus },

@@ -136,7 +136,7 @@ export default function AdminDashboard() {
                                             <td className="px-6 py-4">{getStatusBadge(user.status)}</td>
                                             <td className="px-6 py-4 text-gray-500">{new Date(user.created_at).toLocaleDateString()}</td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                                <div className="flex justify-end gap-2 transition-opacity">
                                                     {user.role !== 'admin' && (
                                                         <>
                                                             {user.status !== 'approved' && (
