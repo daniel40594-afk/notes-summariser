@@ -6,7 +6,7 @@ import ParticleBackground from '@/components/ui/ParticleBackground';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="min-h-screen bg-background text-white flex">
+        <div className="min-h-screen bg-zinc-950 text-white flex">
             {/* Background Particles for Dashboard too */}
             <ParticleBackground />
 
