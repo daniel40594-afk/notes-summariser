@@ -12,7 +12,8 @@ import {
     Menu,
     Users,
     FileText,
-    Folder
+    Folder,
+    Globe
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -42,12 +43,13 @@ export default function Sidebar() {
     const navItems = [
         { name: 'Dashboard', href: '/user', icon: LayoutDashboard },
         { name: 'Workspaces', href: '/workspaces', icon: Folder },
-        { name: 'All Documents', href: '/documents', icon: FileText },
+        { name: 'Document Chat', href: '/documents', icon: FileText },
+        { name: 'Deep Search', href: '/chat?deepSearch=true', icon: Globe },
         { name: 'AI Study Tool', href: '/study', icon: BookOpen },
     ];
 
     // Only add User Management if admin
-    if (role === 'admin') {
+    if (role === 'admin' || role === 'Admin') {
         navItems.push({ name: 'User Management', href: '/admin', icon: Users });
     }
 
